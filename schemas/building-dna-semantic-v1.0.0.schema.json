@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "building-dna-semantic-v1.0.0.schema.json",
+  "title": "BuildingDNA Semantic JSON v1.0.0",
+  "description": "Schema for the BuildingDNA semantic .json file, as documented in BuildingDNA-Specification-v1.0.0.md.",
+  "$comment": "Copyright (c) Pyramoon Innovations Inc. Licensed under CC BY-ND 4.0. See BuildingDNA-LICENSE.",
+  "type": "object",
+  "required": [
+    "buildingDnaVersion",
+    "types",
+    "levels",
+    "rooms",
+    "spaces",
+    "doors",
+    "walls",
+    "windows",
+    "other",
+    "siteContext",
+    "buildingContext"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "buildingDnaVersion": { "const": "1.0.0" },
+    "types": { "$ref": "#/$defs/typesCollection" },
+    "levels": { "$ref": "#/$defs/levelsCollection" },
+    "rooms": { "$ref": "#/$defs/roomsCollection" },
+    "spaces": { "$ref": "#/$defs/spacesCollection" },
+    "doors": { "$ref": "#/$defs/openingsCollection" },
+    "walls": { "$ref": "#/$defs/wallsCollection" },
+    "windows": { "$ref": "#/$defs/openingsCollection" },
+    "other": { "$ref": "#/$defs/otherCollection" },
+    "siteContext": { "$ref": "#/$defs/siteContext" },
+    "buildingContext": { "$ref": "#/$defs/buildingContext" }
+  },
+
+  "$defs": {
+    "nullableString": { "type": ["string", "null"] },
+    "nullableNumber": { "type": ["number", "null"] },
+
+    "parameters": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+
+    "typeRecord": {
+      "type": "object",
+      "required": ["uniqueId", "intId", "category", "family", "type", "parameters"],
+      "additionalProperties": false,
+      "properties": {
+        "uniqueId": { "type": "string" },
+        "intId": { "type": "integer" },
+        "category": { "type": "string" },
+        "family": { "$ref": "#/$defs/nullableString" },
+        "type": { "type": "string" },
+        "parameters": { "$ref": "#/$defs/parameters" }
+      }
+    },
+    "typesCollection": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/typeRecord" } }
+      }
+    },
+
+    "baseRecord": {
+      "type": "object",
+      "required": ["uniqueId", "intId", "category", "parameters"],
+      "additionalProperties": false,
+      "properties": {
+        "uniqueId": { "type": "string" },
+        "intId": { "type": "integer" },
+        "category": { "type": "string" },
+        "typeId": { "$ref": "#/$defs/nullableString" },
+        "hostId": { "$ref": "#/$defs/nullableString" },
+        "parentId": { "$ref": "#/$defs/nullableString" },
+        "levelId": { "$ref": "#/$defs/nullableString" },
+        "parameters": { "$ref": "#/$defs/parameters" }
+      }
+    },
+
+    "levelRecord": {
+      "type": "object",
+      "required": ["uniqueId", "intId", "category", "parameters", "countsAsBuildingStorey"],
+      "additionalProperties": false,
+      "properties": {
+        "uniqueId": { "type": "string" },
+        "intId": { "type": "integer" },
+        "category": { "type": "string" },
+        "typeId": { "$ref": "#/$defs/nullableString" },
+        "hostId": { "$ref": "#/$defs/nullableString" },
+        "parentId": { "$ref": "#/$defs/nullableString" },
+        "levelId": { "$ref": "#/$defs/nullableString" },
+        "parameters": { "$ref": "#/$defs/parameters" },
+        "countsAsBuildingStorey": { "type": "boolean" }
+      }
+    },
+    "levelsCollection": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/levelRecord" } }
+      }
+    },
+
+    "roomAreaMethodValue": { "$ref": "#/$defs/nullableNumber" },
+    "roomAreas": {
+      "type": "object",
+      "required": ["activeMethod", "unit", "values"],
+      "additionalProperties": false,
+      "properties": {
+        "activeMethod": {
+          "type": "string",
+          "enum": ["Finish", "Center", "CoreBoundary", "CoreCenter"]
+        },
+        "unit": { "$ref": "#/$defs/nullableString" },
+        "values": {
+          "type": "object",
+          "required": ["Finish", "Center", "CoreBoundary", "CoreCenter"],
+          "additionalProperties": false,
+          "properties": {
+            "Finish": { "$ref": "#/$defs/roomAreaMethodValue" },
+            "Center": { "$ref": "#/$defs/roomAreaMethodValue" },
+            "CoreBoundary": { "$ref": "#/$defs/roomAreaMethodValue" },
+            "CoreCenter": { "$ref": "#/$defs/roomAreaMethodValue" }
+          }
+        }
+      },
+      "if": {
+        "required": ["unit"],
+        "properties": { "unit": { "type": "null" } }
+      },
+      "then": {
+        "properties": {
+          "values": {
+            "properties": {
+              "Finish": { "const": null },
+              "Center": { "const": null },
+              "CoreBoundary": { "const": null },
+              "CoreCenter": { "const": null }
+            }
+          }
+        }
+      }
+    },
+
+    "surroundingEntry": {
+      "type": "object",
+      "required": ["uniqueId", "facingArea", "facingAreaValue", "facingAreaUnit"],
+      "additionalProperties": false,
+      "properties": {
+        "uniqueId": { "type": "string" },
+        "facingArea": { "$ref": "#/$defs/nullableString" },
+        "facingAreaValue": { "$ref": "#/$defs/nullableNumber" },
+        "facingAreaUnit": { "$ref": "#/$defs/nullableString" }
+      },
+      "if": {
+        "required": ["facingAreaValue"],
+        "properties": { "facingAreaValue": { "type": "number" } }
+      },
+      "then": {
+        "properties": { "facingAreaUnit": { "type": "string" } }
+      }
+    },
+    "surroundingList": {
+      "type": ["array", "null"],
+      "items": { "$ref": "#/$defs/surroundingEntry" }
+    },
+
+    "roomRecord": {
+      "type": "object",
+      "required": [
+        "uniqueId", "intId", "category", "parameters",
+        "surroundingWalls", "surroundingFloors", "surroundingCeilings", "surroundingRoofs",
+        "isEnclosed", "roomAreas"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "uniqueId": { "type": "string" },
+        "intId": { "type": "integer" },
+        "category": { "type": "string" },
+        "typeId": { "$ref": "#/$defs/nullableString" },
+        "hostId": { "$ref": "#/$defs/nullableString" },
+        "parentId": { "$ref": "#/$defs/nullableString" },
+        "levelId": { "$ref": "#/$defs/nullableString" },
+        "parameters": { "$ref": "#/$defs/parameters" },
+        "surroundingWalls": { "$ref": "#/$defs/surroundingList" },
+        "surroundingFloors": { "$ref": "#/$defs/surroundingList" },
+        "surroundingCeilings": { "$ref": "#/$defs/surroundingList" },
+        "surroundingRoofs": { "$ref": "#/$defs/surroundingList" },
+        "isEnclosed": { "type": "boolean" },
+        "roomAreas": { "$ref": "#/$defs/roomAreas" }
+      }
+    },
+    "roomsCollection": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/roomRecord" } }
+      }
+    },
+
+    "spacesCollection": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/baseRecord" } }
+      }
+    },
+
+    "wallsCollection": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/baseRecord" } }
+      }
+    },
+
+    "openingRecord": {
+      "type": "object",
+      "required": [
+        "uniqueId", "intId", "category", "parameters",
+        "fromRoomId", "toRoomId", "roomRelationPhaseId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "uniqueId": { "type": "string" },
+        "intId": { "type": "integer" },
+        "category": { "type": "string" },
+        "typeId": { "$ref": "#/$defs/nullableString" },
+        "hostId": { "$ref": "#/$defs/nullableString" },
+        "parentId": { "$ref": "#/$defs/nullableString" },
+        "levelId": { "$ref": "#/$defs/nullableString" },
+        "parameters": { "$ref": "#/$defs/parameters" },
+        "fromRoomId": { "$ref": "#/$defs/nullableString" },
+        "toRoomId": { "$ref": "#/$defs/nullableString" },
+        "roomRelationPhaseId": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "openingsCollection": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/openingRecord" } }
+      }
+    },
+
+    "otherRecord": {
+      "description": "Every other exported BIM category. The set of categories that can appear here is intentionally open. Only uniqueId, intId, category, and parameters are always required; typeId/hostId/parentId/levelId/roomId/roomRelationPhaseId are validated if present (they appear only when the corresponding relationship exists), and any other property a future category might carry is allowed.",
+      "type": "object",
+      "required": ["uniqueId", "intId", "category", "parameters"],
+      "additionalProperties": true,
+      "properties": {
+        "uniqueId": { "type": "string" },
+        "intId": { "type": "integer" },
+        "category": { "type": "string" },
+        "typeId": { "$ref": "#/$defs/nullableString" },
+        "hostId": { "$ref": "#/$defs/nullableString" },
+        "parentId": { "$ref": "#/$defs/nullableString" },
+        "levelId": { "$ref": "#/$defs/nullableString" },
+        "parameters": { "$ref": "#/$defs/parameters" },
+        "roomId": { "$ref": "#/$defs/nullableString" },
+        "roomRelationPhaseId": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "otherCollection": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/otherRecord" } }
+      }
+    },
+
+    "siteContext": {
+      "type": "object",
+      "required": ["finishedGradeReferenceId", "finishedGradeReferenceType", "finishedGradeReferencePhaseId"],
+      "additionalProperties": false,
+      "properties": {
+        "finishedGradeReferenceId": { "$ref": "#/$defs/nullableString" },
+        "finishedGradeReferenceType": { "$ref": "#/$defs/nullableString" },
+        "finishedGradeReferencePhaseId": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+
+    "buildingContext": {
+      "type": "object",
+      "required": ["buildingArea", "buildingAreaValue", "buildingAreaUnit", "buildingAreaSource", "majorOccupancyClassifications"],
+      "additionalProperties": false,
+      "properties": {
+        "buildingArea": { "$ref": "#/$defs/nullableString" },
+        "buildingAreaValue": { "$ref": "#/$defs/nullableNumber" },
+        "buildingAreaUnit": { "$ref": "#/$defs/nullableString" },
+        "buildingAreaSource": { "$ref": "#/$defs/nullableString" },
+        "majorOccupancyClassifications": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "if": {
+        "required": ["buildingAreaValue"],
+        "properties": { "buildingAreaValue": { "type": "number" } }
+      },
+      "then": {
+        "properties": { "buildingAreaUnit": { "type": "string" } }
+      }
+    }
+  }
+}

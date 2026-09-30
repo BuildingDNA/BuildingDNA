@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "building-dna-map-v1.0.0.schema.json",
+  "title": "BuildingDNA Map JSON v1.0.0",
+  "description": "Schema for the BuildingDNA .map.json file: a flat object mapping each semantic element uniqueId to an array of GLB node indices, plus the reserved buildingDnaVersion key. No wrapper object is used.",
+  "$comment": "Copyright (c) Pyramoon Innovations Inc. Licensed under CC BY-ND 4.0. See BuildingDNA-LICENSE.",
+  "type": "object",
+  "required": ["buildingDnaVersion"],
+  "properties": {
+    "buildingDnaVersion": { "const": "1.0.0" }
+  },
+  "patternProperties": {
+    "^(?!buildingDnaVersion$).+$": {
+      "description": "An element uniqueId mapped to its GLB node indices. At least one node index is required.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "integer", "minimum": 0 }
+    }
+  },
+  "additionalProperties": false
+}
