@@ -1,8 +1,6 @@
 # 
 
-# BuildingDNA 
-
-# Query Examples
+# BuildingDNA Query Examples
 
 ## 
 
